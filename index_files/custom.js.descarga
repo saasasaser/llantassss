@@ -1,0 +1,801 @@
+Array.prototype.contains = function (v) {
+    for (var i = 0; i < this.length; i++) {
+        if (this[i] === v) return true;
+    }
+    return false;
+};
+
+Array.prototype.unique = function (atributo) {
+    var arr = [];    
+    for (var i = 0; i < this.length; i++) {
+        if (!arr.contains(this[i][atributo])) {
+            arr.push(this[i][atributo]);           
+        }
+    }
+
+    if ((arr.length > 0)&&($.isNumeric(arr[0])))    
+        return arr.sort(function (a, b) { return a - b });    
+    else
+        return arr.sort();    
+}
+
+function isEmpty(valor)
+{
+    if ((valor == undefined) || (valor == null) || (valor == ""))
+        return true;
+    else
+        return false;
+}
+
+function getUrlParameter(sParam) {
+    var sPageURL = decodeURIComponent(window.location.search.substring(1)),
+        sURLVariables = sPageURL.split('&'),
+        sParameterName,
+        i;
+
+    for (i = 0; i < sURLVariables.length; i++) {
+        sParameterName = sURLVariables[i].split('=');
+
+        if (sParameterName[0] === sParam) {
+            return sParameterName[1] === undefined ? true : sParameterName[1];
+        }
+    }
+};
+
+function filtraOpciones(opcs, color, tamano,ancho, tornillos, pcd, et, buje)
+{
+    //console.log(color + " -- " + tamano + " -- " + tornillos + " -- " + pcd + " -- " + et + " -- " + ancho + " -- " + buje);
+
+    var opcionesFiltradas = jQuery.grep(opcs, function (item, idx) {
+        var bRes = true;
+        
+        if (!isEmpty(color)) {            
+            if (item.color != color)
+                bRes = false;
+        }
+        
+        if (!isEmpty(tamano)) {            
+            if (item.tamano != tamano)
+                bRes = false;
+        }
+        
+        if (!isEmpty(tornillos)) {            
+            if (item.tornillos != tornillos)
+                bRes = false;
+        }
+        
+        if (!isEmpty(pcd)) {            
+            if (item.pcd != pcd)
+                bRes = false;
+        }
+        
+        if (!isEmpty(et)) {            
+            if (item.et != et)
+                bRes = false;
+        }
+
+        if (!isEmpty(ancho)) {            
+            if (item.ancho != ancho)
+                bRes = false;
+        }
+        if (!isEmpty(buje)) {            
+            if (item.buje != buje)
+                bRes = false;
+        }
+
+        return bRes;
+    });
+    return opcionesFiltradas;
+}
+
+function DiasEntregaToString(dias)
+{    
+    switch (dias) {
+        case 1:
+            return "24h";
+        case 2:
+            return "48h";
+        case 15:
+            return "entre 7 y 15 d&iacute;as";
+        default:
+            return dias + " d&iacute;as";
+    }
+}
+
+function twoDecimals(valor)
+{
+    //formatter.format(valor)
+    return (Math.round((valor * 100)) / 100).toString().replace(".", ",");
+}
+
+function GetTornillos()
+{    
+    $("#hdTornillos").val($("#selectTornillosNormales").val() + '/' + $("#selectTornilloAntirrobo").val());
+    //console.log($("#hdTornillos").val());
+    return true;
+}
+
+function aplicaOpciones(color, tamano, tornillos, pcd, et, ancho, buje)
+{    
+    var vColor = $("#selectColor").val();
+    if (!isEmpty(color))
+        vColor = color;
+    
+    var vTamano = $("#selectTamano").val();
+    if (!isEmpty(tamano))
+        vTamano = tamano;
+
+    var vTornillos = $("#selectTornillos").val();
+    if (!isEmpty(tornillos))
+        vTornillos = tornillos;
+
+    var vPcd = $("#selectPcd").val();    
+    if (!isEmpty(pcd))
+        vPcd = pcd;
+
+    var vEt = $("#selectEt").val();
+    if (!isEmpty(et))
+        vEt = et;
+
+    var vAncho = $("#selectAncho").val();
+    if (!isEmpty(ancho))
+        vAncho = ancho;
+
+    var vBuje = $("#selectBuje").val();
+    if (!isEmpty(buje))
+        vBuje = buje;
+
+
+    var uniques = opciones.unique("color");
+    $("#selectColor").html("");
+    $(uniques).each(function (idx, val) {
+        if (vColor == val)
+            $("#selectColor").append("<option selected>" + val + "</option>");
+        else
+            $("#selectColor").append("<option>" + val + "</option>");
+    });
+    
+    var opcs = filtraOpciones(opciones, $("#selectColor").val());
+    uniques = opcs.unique("tamano");
+    $("#selectTamano").html("");
+    $(uniques).each(function (idx, val) {
+        if (vTamano == val)
+            $("#selectTamano").append("<option selected>" + val + "</option>");
+        else
+            $("#selectTamano").append("<option>" + val + "</option>");
+    });
+
+
+    opcs = filtraOpciones(opcs, $("#selectColor").val(), $("#selectTamano").val());
+    uniques = opcs.unique("ancho");
+    $("#selectAncho").html("");
+    $(uniques).each(function (idx, val) {
+        if (vAncho == val)
+            $("#selectAncho").append("<option selected>" + val + "</option>");
+        else
+            $("#selectAncho").append("<option>" + val + "</option>");
+    });
+
+
+    opcs = filtraOpciones(opcs, $("#selectColor").val(), $("#selectTamano").val(), $("#selectAncho").val());
+    uniques = opcs.unique("tornillos");
+    $("#selectTornillos").html("");
+    $(uniques).each(function (idx, val) {
+        if (vTornillos == val)
+            $("#selectTornillos").append("<option selected>" + val + "</option>");
+        else
+            $("#selectTornillos").append("<option>" + val + "</option>");
+    });
+
+    opcs = filtraOpciones(opcs, $("#selectColor").val(), $("#selectTamano").val(), $("#selectAncho").val(), $("#selectTornillos").val());
+    uniques = opcs.unique("pcd");
+    $("#selectPcd").html("");
+    $(uniques).each(function (idx, val) {
+        if(vPcd==val)
+            $("#selectPcd").append("<option selected>" + val + "</option>");
+        else
+            $("#selectPcd").append("<option>" + val + "</option>");
+    });
+
+    opcs = filtraOpciones(opcs, $("#selectColor").val(), $("#selectTamano").val(), $("#selectAncho").val(), $("#selectTornillos").val(), $("#selectPcd").val());
+    uniques = opcs.unique("et");
+    $("#selectEt").html("");    
+    $(uniques).each(function (idx, val) {        
+        if (vEt == val) {            
+            $("#selectEt").append("<option selected>" + val + "</option>");
+        }
+        else
+            $("#selectEt").append("<option>" + val + "</option>");
+    });    
+    
+    opcs = filtraOpciones(opcs, $("#selectColor").val(), $("#selectTamano").val(), $("#selectAncho").val(), $("#selectTornillos").val(), $("#selectPcd").val(), $("#selectEt").val());
+    uniques = opcs.unique("buje");
+    $("#selectBuje").html("");
+    $(uniques).each(function (idx, val) {
+        if(vBuje==val)
+            $("#selectBuje").append("<option selected>" + val + "</option>");
+        else
+            $("#selectBuje").append("<option>" + val + "</option>");
+    });
+
+
+    //Cogemos el precio y el pk del producto seleccionado
+    opcs = filtraOpciones(opcs, $("#selectColor").val(), $("#selectTamano").val(), $("#selectAncho").val(), $("#selectTornillos").val(), $("#selectPcd").val(), $("#selectEt").val(), $("#selectBuje").val());    
+    if ($(opcs).length > 0) {
+        $("#hdPkProducto").val(opcs[0].clave);        
+        var precio = opcs[0].precio;
+        var pvp = opcs[0].pvp;
+        var precio_anterior = opcs[0].precio_anterior;
+        var peso = opcs[0].peso;
+        var peso_soportado = opcs[0].peso_soportado;
+        var flowforming = opcs[0].flowforming;
+        var envio = opcs[0].stock ? opcs[0].preparacion_envio : "Consultar";
+        var stock = opcs[0].stock;
+
+        /*Mostramos la opción de tornillos si corresponde*/
+        if (opcs[0].proponer_tornillos == 0) 
+            $(".tornillosNormales").hide();
+        else
+            $(".tornillosNormales").show();
+
+        if (opcs[0].proponer_tornillos_antirrobo == 0) 
+            $(".tornillosAntirrobo").hide();
+        else
+            $(".tornillosAntirrobo").show();
+
+
+        if (stock) {
+            $(".entrega").show();
+            $(".consultar").hide();
+        }
+        else {
+            $(".entrega").hide();
+            $(".consultar").show();
+        }
+
+        //descuento_profesionales        
+
+        $(".price strong").html(twoDecimals(precio));
+        var precio_iva = precio * 1.21;
+        precio_iva = Math.round(precio_iva * 100) / 100;
+
+        $(".conIva").html(twoDecimals(precio_iva) + "&euro;");        
+        if (pvp > precio) {
+            var dto = Math.round(100 - ((precio * 100) / pvp));
+            if (dto >= 5) {
+                $(".ahorro").html("Precio anterior: " + twoDecimals(pvp) + "&euro; - <strong>Ahorras " + twoDecimals(pvp - precio) + "&euro; = -" + dto + "% dto</strong>");
+                $(".ahorro").show();
+            }
+            else {
+                $(".ahorro").html("");
+                $(".ahorro").hide();
+            }
+        }
+        else {
+            $(".ahorro").html("");
+            $(".ahorro").hide();
+        }
+
+        //Simulador pagamastarde        
+        /*$(".totalPMT").html(twoDecimals(precio_iva * parseInt($("#txtCantidad").val())));
+        pmtSimulator.simulator_app.setPublicKey("tk_27b84a7eeb7e584951b53a65");
+        pmtSimulator.simulator_app.init();
+        pmtSimulator.simulator_app.updateSimulators(function () {
+            $(".PmtSimulator-textClaim").html("Paga tus 4 llantas a plazos!");
+        });*/
+        
+
+        $("#tabEspecificaciones dd.color").html($("#selectColor").val());
+        $("#tabEspecificaciones dd.tamano").html($("#selectTamano").val());
+        $("#tabEspecificaciones dd.ancho").html($("#selectAncho").val());
+        $("#tabEspecificaciones dd.tornillos").html($("#selectTornillos").val());
+        $("#tabEspecificaciones dd.pcd").html($("#selectPcd").val());
+        $("#tabEspecificaciones dd.et").html($("#selectEt").val());
+        $("#tabEspecificaciones dd.buje").html($("#selectBuje").val());
+        $("#tabEspecificaciones dd.precio").html(precio + "&euro;");
+
+
+        //Precio anterior
+        if (precio_anterior > 0)
+            $("#tabEspecificaciones dd.precioAnterior").html(precio_anterior + "&euro;");
+        else
+            $("#tabEspecificaciones .precioAnterior").hide();
+        //Peso        
+        if (peso > 0)
+            $("#tabEspecificaciones dd.peso").html(peso.toString().replace(".", ",") + "kg");
+        else
+            $("#tabEspecificaciones .peso").hide();
+        //peso_soportado
+        if (peso_soportado > 0)
+            $("#tabEspecificaciones dd.pesoSoportado").html(peso_soportado.toString().replace(".", ",") + "kg");
+        else
+            $("#tabEspecificaciones .pesoSoportado").hide();
+        //flowforming
+        if (flowforming)
+            $("#tabEspecificaciones dd.flowforming").html("Si");
+        else
+            $("#tabEspecificaciones .flowforming").hide();
+
+        $("#tabEspecificaciones dd.envio").html(envio);
+
+        //console.log(JSON.stringify(opcs));
+
+        //Cambiamos las fotos
+        var $owl = $('.owl-carousel');
+
+
+        $owl.html("");
+
+        $(opcs[0].imagenes).each(function (idx, val) {            
+            $owl.append("<div class='overlay-container overlay-visible'><img src='" + val + "' alt='' /></div>");//<a href='" + val + "' class='popup-img overlay-link' title='Foto de la llanta'><i class='fa fa-search-plus'></i></a>
+        });
+        var owlInstance = $owl.data('owlCarousel');
+        // if instance is existing
+        if (owlInstance != null) {
+            owlInstance.reinit();
+        }
+    }
+    else {
+        $("#hdPkProducto").val("");
+        $("#hdTornillos").val("");
+    }
+    //console.log(JSON.stringify(opcs));
+}
+
+function CalculaDto(precio, pvp) {
+    //console.log(pvp +' -- '+precio);
+    if (pvp > precio) {
+        var dto = Math.round(100 - ((precio * 100) / pvp));
+        if (dto >= 5) {
+            return "-"+dto+"% dto";            
+        }
+        else {
+            return "";
+        }
+    }
+    else {
+        return "";
+    }
+}
+
+function CalculaPrecioAccesorio() {
+    //Buscamos el pk del producto seleccionado por los valores indicados
+    //Calculamos precio
+    //Insertamos el pk en el hidden
+    //Aplicamos fotos que corresponden
+    var valores = [];
+
+    $("#accesorioDetalle .atributos select").each(function (idx,obj) {
+        var nombreAtr = $(obj).attr("id").replace("select", "");                
+        valores.push({ nombre: nombreAtr, valor: $(obj).val() });
+    });
+
+    //console.log(JSON.stringify(valores));
+    //console.log(JSON.stringify($(opciones)));
+        
+    $("#hdPkProducto").val("");
+    var bEncontrado = false;
+    if ($(opciones).length > 0) {        
+        $(opciones).each(function (idx, opc) {
+            //console.log(JSON.stringify(opc.valores) +" --- "+ JSON.stringify(valores));
+            if (JSON.stringify(opc.valores) === JSON.stringify(valores)) {
+                bEncontrado = true;
+                //console.log("Encontrado: " + JSON.stringify(opc));
+                $(".price strong").html(twoDecimals(opc.precio));
+                var precio_iva = opc.precio * 1.21;
+                precio_iva = Math.round(precio_iva * 100) / 100;
+                $(".conIva").html(twoDecimals(precio_iva) + " &euro;");
+                $("#hdPkProducto").val(opc.clave);
+            }
+        });
+    }
+
+    if (bEncontrado) {//si no hay match - No se podrá comprar
+        $("#btAgregarCesta, .disponible").show();
+        $(".nodisponible").hide();
+    }
+    else {
+        $("#btAgregarCesta, .disponible").hide();
+        $(".nodisponible").show();
+    }    
+}
+
+function createCookie(name, value, days) {
+    var expires = "";
+    if (days) {
+        var date = new Date();
+        date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+        expires = "; expires=" + date.toUTCString();
+    }
+    document.cookie = name + "=" + value + expires + "; path=/";
+}
+
+function readCookie(name) {
+    var nameEQ = name + "=";
+    var ca = document.cookie.split(';');
+    for (var i = 0; i < ca.length; i++) {
+        var c = ca[i];
+        while (c.charAt(0) == ' ') c = c.substring(1, c.length);
+        if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length, c.length);
+    }
+    return null;
+}
+
+function eraseCookie(name) {
+    createCookie(name, "", -1);
+}
+
+function isSet(valor) {
+    if ((valor !== undefined) && (valor != ""))
+    {
+        return true;
+    }
+    else
+        return false;
+}
+
+$(document).ready(function () {   
+    var x = readCookie('aplazame');
+    if(x) {
+        //Ya hemos mostrado la pantalla - No hacemos nada
+    }
+    else
+    {
+        setTimeout(function () {
+            //Mostramos la pantalla y escribimos la cookie para que no vuelva a aparecer
+            $('#modalAplazame').modal('show');
+            createCookie('aplazame', 'modal', 1);
+        }, 30000);
+    }
+
+    //Búsqueda por coche --> Filtro por modelo
+    $("#txtFiltroModelo").keyup(function (evt) {
+        if ($(this).val() == "") {
+            $(".modeloItem").show();
+        } else {
+            $(".modeloItem").hide();
+            $(".modeloItem[data-modelo*='" + $(this).val().toLowerCase() + "']").show();
+        }
+    });
+
+    //Buscador --> Botón más resultados del buscador
+    var btMas = $("#buscador .masResultados");
+    if ($(btMas).length > 0) {
+        $(btMas).removeAttr("href");
+        $(btMas).click(function () {
+            GetPaginaSiguiente();                     
+        });
+    }
+
+    //Scroll infinito: Ocultamos el pie y el botón masResultados
+    $("#helpPhone,#garantias,.footer,.masResultados,#texto_marca").hide();
+    $(window).on("scroll", function () {
+        var scrollHeight = $(document).height();
+        var scrollPosition = $(window).height() + $(window).scrollTop();
+        //console.log(scrollPosition + " -- " + scrollHeight);
+        //console.log((scrollHeight - scrollPosition) + " -- " + scrollHeight);
+        //console.log((((scrollHeight - scrollPosition) / scrollHeight)));
+        //console.log((((scrollHeight - scrollPosition) / scrollHeight))<0.2);
+        //if ((scrollHeight - scrollPosition) / scrollHeight === 0) {
+        /*if ((scrollHeight - scrollPosition) / scrollHeight < 0.2) {
+            GetPaginaSiguiente();
+        }*/
+
+        if (scrollPosition > (scrollHeight - 100)) {//Solicitamos la siguiente página cuando llegamos a los 100 últimos px del scroll
+            GetPaginaSiguiente();
+        }
+    });
+    /*******************************************************************/
+
+    var btBuscar = $("#btBuscar");
+    if ($(btBuscar).length > 0) {
+        /*Cargamos los datos del querystring*/
+        var tamano = getUrlParameter('tamano');
+        if (tamano !== undefined)
+            $("#ddlTamano").val(tamano);
+
+        var pesosoportado = getUrlParameter('pesosoportado');
+        if (pesosoportado !== undefined)
+            $("#txtCarga").val(pesosoportado);
+
+        var marca = getUrlParameter('marca');        
+        if (marca !== undefined)
+            $("#ddlMarca").val(marca);
+
+        var entrega = getUrlParameter('entrega');
+        if (entrega !== undefined)
+            $("#ddlEntrega").val(entrega);
+
+        var precio = getUrlParameter('precio');
+        if (precio !== undefined)
+            $("#txtPrecio").val(precio);
+
+        var anchomin = getUrlParameter('anchomin');
+        if (anchomin !== undefined)
+            $("#txtAnchoMin").val(anchomin);
+
+        var anchomax = getUrlParameter('anchomax');
+        if (anchomax !== undefined)
+            $("#txtAnchoMax").val(anchomax);
+
+        var tornillos = getUrlParameter('tornillos');
+        if (tornillos !== undefined)
+            $("#txtTornillos").val(tornillos);
+
+        var pcd = getUrlParameter('pcd');
+        if (pcd !== undefined)
+            $("#txtPcd").val(pcd);
+
+        var etmin = getUrlParameter('etmin');
+        if (etmin !== undefined)
+            $("#txtEtMin").val(etmin);
+
+        var etmax = getUrlParameter('etmax');
+        if (etmax !== undefined)
+            $("#txtEtMax").val(etmax);
+
+        var peso = getUrlParameter('peso');
+        if (peso !== undefined)
+            $("#txtPeso").val(peso);
+
+        var flowforming = getUrlParameter('flow');
+        if (flowforming !== undefined)
+            $("#ddlFlowforming").val(flowforming);
+
+        var nm = getUrlParameter('search');
+        if (nm !== undefined)
+            $("#txtNombreLlantas").val(nm);
+
+        var ancho = getUrlParameter('ancho');
+        if (ancho !== undefined)
+            $("#ddlAncho").val(ancho);
+
+        var alto = getUrlParameter('alto');
+        if (alto !== undefined)
+            $("#ddlAlto").val(alto);
+
+        var diametro = getUrlParameter('diametro');
+        if (diametro !== undefined)
+            $("#ddlDiametro").val(diametro);
+
+        var carga = getUrlParameter('carga');
+        if (carga !== undefined)
+            $("#ddlCarga").val(carga);
+
+        var velocidad = getUrlParameter('velocidad');
+        if (velocidad !== undefined)
+            $("#ddlVelocidad").val(velocidad);
+
+        var season = getUrlParameter('season');
+        if (season !== undefined)
+            $("#ddlSeason").val(season);
+
+        var runflat = getUrlParameter('runflat');
+        if (runflat !== undefined)
+            $("#ddlRunflat").val(runflat);
+
+        
+        $(btBuscar).removeAttr("href");
+        $(btBuscar).click(function () {            
+            var qry = "";
+            //if ($("#ddlMarca").val() != "") {
+            //Lo comentamos pq cuando buscas desde "marcas de llantas" y quieres quitar la marca, 
+            // si dejas esta condición if, siempre te vuelve a poner la marca pq viene en la url
+                //qry += (qry == "" ? "?" : "&") + "marca=" + $("#ddlMarca").val();
+            //}
+            if (isSet($("#ddlTamano").val())) {
+                qry += (qry == "" ? "?" : "&") + "tamano=" + $("#ddlTamano").val();
+            }
+            if (isSet($("#txtCarga").val())) {
+                qry += (qry == "" ? "?" : "&") + "pesosoportado=" + $("#txtCarga").val();
+            }            
+            if (isSet($("#ddlEntrega").val())) {
+                qry += (qry == "" ? "?" : "&") + "entrega=" + $("#ddlEntrega").val();
+            }
+            if (isSet($("#txtPrecio").val())) {
+                qry += (qry == "" ? "?" : "&") + "precio=" + $("#txtPrecio").val();
+            }
+            if (isSet($("#txtAnchoMin").val())) {
+                qry += (qry == "" ? "?" : "&") + "anchomin=" + $("#txtAnchoMin").val();
+            }
+            if (isSet($("#txtAnchoMax").val())) {
+                qry += (qry == "" ? "?" : "&") + "anchomax=" + $("#txtAnchoMax").val();
+            }
+            if (isSet($("#txtTornillos").val())) {
+                qry += (qry == "" ? "?" : "&") + "tornillos=" + $("#txtTornillos").val();
+            }
+            if (isSet($("#txtPcd").val())) {
+                qry += (qry == "" ? "?" : "&") + "pcd=" + $("#txtPcd").val();
+            }
+            if (isSet($("#txtEtMin").val())) {
+                qry += (qry == "" ? "?" : "&") + "etmin=" + $("#txtEtMin").val();
+            }
+            if (isSet($("#txtEtMax").val())) {
+                qry += (qry == "" ? "?" : "&") + "etmax=" + $("#txtEtMax").val();
+            }
+            if (isSet($("#txtPeso").val())) {
+                qry += (qry == "" ? "?" : "&") + "peso=" + $("#txtPeso").val();
+            }
+            if (isSet($("#ddlFlowforming").val())) {
+                qry += (qry == "" ? "?" : "&") + "flow=" + $("#ddlFlowforming").val();
+            }
+            if (isSet($("#txtNombreLlantas").val())) {
+                qry += (qry == "" ? "?" : "&") + "search=" + $("#txtNombreLlantas").val();
+            }
+
+            if (isSet($("#ddlAncho").val())) {
+                qry += (qry == "" ? "?" : "&") + "ancho=" + $("#ddlAncho").val();
+            }
+            if (isSet($("#ddlAlto").val())) {
+                qry += (qry == "" ? "?" : "&") + "alto=" + $("#ddlAlto").val();
+            }
+            if (isSet($("#ddlDiametro").val())) {
+                qry += (qry == "" ? "?" : "&") + "diametro=" + $("#ddlDiametro").val();
+            }
+            if (isSet($("#ddlCarga").val())) {
+                qry += (qry == "" ? "?" : "&") + "carga=" + $("#ddlCarga").val();
+            }
+            if (isSet($("#ddlVelocidad").val())) {
+                qry += (qry == "" ? "?" : "&") + "velocidad=" + $("#ddlVelocidad").val();
+            }
+            if (isSet($("#ddlMarca").val())) {
+                qry += (qry == "" ? "?" : "&") + "marca=" + $("#ddlMarca").val();
+            }
+            if (isSet($("#ddlSeason").val())) {
+                qry += (qry == "" ? "?" : "&") + "season=" + $("#ddlSeason").val();
+            }
+            if (isSet($("#ddlRunflat").val())) {
+                qry += (qry == "" ? "?" : "&") + "runflat=" + $("#ddlRunflat").val();
+            }
+            
+            if ((location.pathname == "/default.aspx") || (location.pathname == "/") || (location.pathname == "")) {//Viene de la home sin ningún filtro previo en la url
+                //console.log(location.protocol + '//' + location.host + "/llantas/default.aspx" + qry);
+                window.location = location.protocol + '//' + location.host + "/llantas/default.aspx" + qry;
+            }
+            else {
+                //console.log(location.protocol + '//' + location.host + location.pathname + qry);
+                window.location = location.protocol + '//' + location.host + location.pathname + qry;
+            }
+        });
+    }
+
+   
+    //Detalle --> Control de los atributos y cálculos de precios
+    if ($("#productoDetalle").length > 0) {        
+        aplicaOpciones(getUrlParameter("color"));
+        $("#selectColor, #selectTamano, #selectTornillos, #selectPcd, #selectEt, #selectAncho, #selectBuje, #txtCantidad").change(function () {
+            aplicaOpciones();
+        });
+    }
+
+    //Accesorios-Detalle
+    if ($("#accesorioDetalle").length > 0) {
+        if ($(opciones).length > 0) {
+            //console.log(JSON.stringify($(opciones)[0].valores));
+            //Aplicamos los valores del primer elemento
+            $($(opciones)[0].valores).each(function(idx,val){
+                $("#select" + val.nombre).val(val.valor);
+            });            
+        }
+        CalculaPrecioAccesorio();
+        $("#accesorioDetalle .atributos select").change(function () {
+            CalculaPrecioAccesorio();
+        });
+    }    
+});
+
+function GetPaginaSiguiente() {    
+    var btMas = $(".masResultados");
+    if ($(btMas).length > 0)//si existe el boton de más resultados
+    {
+        if ($(btMas).attr("data-loading") !== "1") {
+            $(btMas).attr("data-loading", "1");
+            //console.log("Cargando 2:" + $(btMas).attr("data-loading"));
+            var pag = 1;
+            if ($(btMas).attr("data-pag") !== undefined)
+                pag = parseInt($(btMas).attr("data-pag"));
+
+            var elementos_por_pag = parseInt($(btMas).attr("data-pag-elements"));
+            $(btMas).hide();
+            console.log("Solicitando página:" + pag);
+
+            var tipoBusqueda = $(btMas).attr("data-tipo");
+
+            $("#cargando").removeClass("hidden");
+
+            
+            $.ajax({
+                type: "POST",
+                url: "/buscador.aspx/GetPaginaSiguiente",
+                data: "{pag:" + pag + "}",
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                error: function (response) {
+                    $("#cargando").addClass("hidden");
+                    console.log(response);
+                    //alert("Upps... No hemos logrado cargar la siguiente página");
+                    //$(btMas).attr("data-loading", "0");
+                },
+                success: function (msg) {
+                    var grid = $(".gridLlantas");
+                    //console.log($(msg.d).length);                                        
+                    var div = null;
+                    $(msg.d).each(function (idx, val) {
+                        //console.log(JSON.stringify(val));                        
+                        if ((idx % 4) == 0) {
+                            if (div != null)
+                                $(grid).append(div);
+                            div = $("<div class='row masonry-grid-fitrows grid-space-10'></div>");
+                        }
+                        var item =
+                            "<div class='col-md-3 col-sm-6 masonry-grid-item'>" +
+                            "	<div class='listing-item white-bg bordered mb-20'>" +
+                            "		<div class='overlay-container'>" +
+                            "			<img src='" + val.thumb + "' alt='" + val.nombre_completo + "' >" +
+                            "			<a class='overlay-link' href='" + val.url_detalle + "'><i class='fa fa-search-plus'></i></a>" +
+                            "			<div class='overlay-to-top links'>" +
+                            "				<span class='small'>" +
+                            "					<a href='#' class='btn-sm-link' style='display:none;'><i class='fa fa-heart-o pr-10'></i>Lista de deseos</a>" +
+                            "					<a href='" + val.url_detalle + "' class='btn-sm-link'><i class='icon-link pr-5'></i>Ver detalles</a>" +
+                            "				</span>" +
+                            "			</div>" +                                                              
+                            "		</div>" +
+                            "		<div class='body'>" +
+                            "			<h3><a href='" + val.url_detalle + "'>" + val.nombre_completo + "</a></h3>" +
+                            "			<div class='elements-list clearfix'>" +
+                            "				<span class='price'>" + twoDecimals(val.precio_desde) + "&euro;</span> <small class='dto'>" + CalculaDto(val.precio_desde, val.pvp) + "</small>" +
+                            "				<a href='" + val.url_detalle + "' class='pull-right margin-clear btn btn-sm btn-default-transparent btn-animated'>Ver detalles<i class='fa fa-shopping-cart'></i></a>" +
+                            "			</div>" +
+                            "		</div>" +
+                            "       <div class='entrega' " + (val.stock < 4 ? "style='display:none'" : "") + "><i class='fa fa-truck'></i> " + DiasEntregaToString(val.entrega) + "</div>" +
+                            "	</div>" +
+                            "</div>";
+                        $(div).append(item);
+                    });
+
+                    if (div != null)
+                        $(grid).append(div);
+
+                    $(btMas).attr("data-pag", (pag + 1));
+                    if ((msg.d.length > 0) && (msg.d.length % elementos_por_pag) == 0)//Si trae menos que los elementos por página es que ya ha terminado de cargar todo
+                    {
+                        //console.log(msg.d.length +" -- "+ elementos_por_pag);
+                        //$(btMas).show();
+                        $(btMas).attr("data-loading", "0");
+                    }
+                    else {
+                        //console.log("Muestra: " + $(btMas).attr("data-loading"));
+                        $("#helpPhone,#garantias,.footer,#texto_marca").show();
+                    }
+
+                    $("#cargando").addClass("hidden");
+                }
+            });
+            
+        }        
+    }
+    else
+        $("#helpPhone,#garantias,.footer,#texto_marca").show();
+}
+
+function GetEstadoPedido(id) {
+    $.ajax({
+        type: "POST",
+        url: "/checkout-review.aspx/GetEstadoPedido",
+        data: "{id:'" + id + "'}",
+        contentType: "application/json; charset=utf-8",
+        dataType: "json",
+        error: function (response) {            
+            console.log("Error al obtener el estado en GetEstadoPedido");//" + JSON.stringify(response));
+        },
+        success: function (msg) {
+            //console.log("Estado:"+msg.d);
+            switch(msg.d)
+            {
+                case "Cancelado":
+                    window.location = "/checkout-pago.aspx?error=sequra";
+                    break;
+            }
+        }
+    });
+}
